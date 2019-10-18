@@ -5,8 +5,8 @@ int main()
 {
     char startstr1[4]={0x00,0x00,0x00,0x01};
     char startstr2[3]={0x00,0x00,0x01};
-    unsigned position_len;
-    unsigned position[15000];
+    unsigned position_len;  //length of position array
+    unsigned position[15000];  //store the position of each start code
     int *framesize,frame_num,i;
     FILE *fp,*fpres;
     fp=fopen("for_birds.h264","r");
