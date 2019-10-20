@@ -4,14 +4,15 @@
 
 #include "main.hh"
 
-#include<stdio.h>
-#include<stdlib.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 static const char startPattern1[] = {0x00, 0x00, 0x00, 0x01};
 static const char startPattern2[] = {0x00, 0x00, 0x01};
 
 
-int get_position(FILE *fp, const char const * str1, const char const * str2, unsigned *posi)
+int get_position(FILE *fp, const char *   str1, const char* const str2, unsigned *posi)
 {
     if (!fp || !str1 || !str2) {
         return 0;
@@ -79,8 +80,10 @@ int main()
     }
 
     position_len=get_position(fp,startPattern1,startPattern2,position);
+
     frame_num=position_len;
-    framesize=malloc(sizeof(int)*frame_num);
+
+    framesize = (int*) malloc(sizeof(int)*frame_num);
 
     for (i=1;i<frame_num;i++) {
         framesize[i-1]=position[i]-position[i-1];
