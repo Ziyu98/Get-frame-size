@@ -2,7 +2,7 @@
 #include<stdlib.h>
 #include "Information.h"
 #include "gettype.cpp"
-int get_position(FILE *fp,char *str1, char *str2, unsigned *posi,int *type,NALU_t *nalu);
+int get_position(FILE *fp,char *str1, char *str2, unsigned *posi,unsigned *offs,NALU_t *nalu);
 int get_nalu(FILE *fp, unsigned *posi, NALU_t *nalu,int size);
 int main()
 {
@@ -10,7 +10,8 @@ int main()
     char startstr1[4]={0x00,0x00,0x00,0x01};
     char startstr2[3]={0x00,0x00,0x01};
     unsigned position_len;
-    unsigned position[10000];
+    unsigned position[10000];//store the start position of each nalu(begin with the start conde)
+    unsigned offset[10000];//store the offset of each nalu(begin with the header, in order to compare with h264_analyze)
     NALU_t nalu[10000];
     //nalu=malloc(sizeof(NALU_t));
     int *framesize,frame_num,i;
@@ -20,7 +21,7 @@ int main()
     fpres=fopen("result.txt","w");
     if(!fpres)
     printf("null file!\n");
-    position_len=get_position(fp,startstr1,startstr2,position,type,nalu);
+    position_len=get_position(fp,startstr1,startstr2,position,offset,nalu);
     frame_num=position_len;
     framesize=malloc(sizeof(int)*frame_num);
     //GetFrameType(nalu);
@@ -44,12 +45,13 @@ int main()
         sps++;
         if(nalu[i].Frametype==8)
         pps++;
+        printf("offset =%d,size=%d\n",offset[i],nalu[i].len);
     }
     
 
 }
 
-int get_position(FILE *fp,char *str1, char *str2, unsigned *posi,int *tpye,NALU_t *nalu)
+int get_position(FILE *fp,char *str1, char *str2, unsigned *posi,unsigned *offs,NALU_t *nalu)
 {
     if(!fp||!str1||!str2) return 0;
     unsigned pos=0,pos_end=0;
@@ -71,7 +73,7 @@ int get_position(FILE *fp,char *str1, char *str2, unsigned *posi,int *tpye,NALU_
             nalu[pos_len].nal_unit_type=buf1[strlen1]&0x1f;
             nalu[pos_len].startcodeprefix_len=4;
 
-            tpye[pos_len]=buf1[strlen1]&0x1f;
+            offs[pos_len]=pos+4;
             posi[pos_len]=pos;
             pos_len++;
         }
@@ -80,7 +82,7 @@ int get_position(FILE *fp,char *str1, char *str2, unsigned *posi,int *tpye,NALU_
             nalu[pos_len].forbidden_bit=0;
             nalu[pos_len].nal_unit_type=buf1[strlen1]&0x1f;
             nalu[pos_len].startcodeprefix_len=3;
-            tpye[pos_len]=buf1[strlen1]&0x1f;
+            offs[pos_len]=pos+4;
             posi[pos_len]=pos+1;
             pos_len++;
         } 
@@ -116,6 +118,3 @@ int get_nalu(FILE *fp, unsigned *posi, NALU_t *nalu,int size)
     }
     fseek(fp,0L,SEEK_SET);
 }
-
-
-
